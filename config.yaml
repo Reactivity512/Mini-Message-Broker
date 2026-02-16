@@ -1,0 +1,11 @@
+server:
+  grpc_port: 50051
+  http_port: 8080
+
+broker:
+  default_retention_messages: 10000
+  ack_timeout_seconds: 30
+  max_message_size: 1048576  # 1MB
+
+logging:
+  level: info  # debug, info, warn, error

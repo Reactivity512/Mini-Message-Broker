@@ -1,0 +1,82 @@
+version: '3'
+
+vars:
+  BINARY: bin/broker
+  PROTO_DIR: api/proto
+  PROTO_OUT: internal/delivery/grpc/pb
+
+tasks:
+  default:
+    desc: "Показать список доступных команд"
+    cmds:
+      - task --list
+
+  run:
+    desc: "Запустить сервер брокера сообщений"
+    cmds:
+      - go run ./cmd/server
+
+  build:
+    desc: "Собрать приложение"
+    cmds:
+      - go build -o {{.BINARY}} ./cmd/server
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+
+  proto:
+    desc: "Генерация кода Go из protobuf (требуется наличие protoc в переменной PATH)"
+    cmds:
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      - mkdir -p {{.PROTO_OUT}}
+      - protoc --go_out={{.PROTO_OUT}} --go_opt=paths=source_relative --go-grpc_out={{.PROTO_OUT}} --go-grpc_opt=paths=source_relative -I {{.PROTO_DIR}} {{.PROTO_DIR}}/*.proto
+    sources:
+      - api/proto/*.proto
+
+  proto:win:
+    desc: "Скачайте protoc для Windows и сгенерируйте код на Go"
+    cmds:
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      - powershell -NoProfile -ExecutionPolicy Bypass -File scripts/proto-win.ps1
+    sources:
+      - api/proto/*.proto
+
+  test:
+    desc: "Запустить тесты"
+    cmds:
+      - go test ./...
+
+  bench:
+    desc: Запустить бенчмарк
+    cmds:
+      - go test ./internal/usecase/... ./internal/repository/memory/... -bench=. -benchmem -run=^$
+
+  lint:
+    desc: "Запустить линтер"
+    cmds:
+      - golangci-lint run ./...
+
+  fmt:
+    desc: "Форматировать код"
+    cmds:
+      - go fmt ./... -v
+
+  vet:
+    desc: "Запустить go vet"
+    cmds:
+      - go vet ./...
+
+  deps:
+    desc: "Установить зависимости"
+    cmds:
+      - go mod download
+      - go mod tidy
+
+  clean:
+    desc: "Удалить артефакты сборки"
+    cmds:
+      - rm -f {{.BINARY}}
+      - rm -rf {{.PROTO_OUT}}/*.pb.go

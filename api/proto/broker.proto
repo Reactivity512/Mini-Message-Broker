@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package broker;
+
+option go_package = "queue-service/internal/delivery/grpc/pb;pb";
+
+service Broker {
+  rpc CreateTopic(CreateTopicRequest) returns (CreateTopicResponse);
+  rpc CreateQueue(CreateQueueRequest) returns (CreateQueueResponse);
+  rpc ListTopics(ListTopicsRequest) returns (ListTopicsResponse);
+  rpc ListQueues(ListQueuesRequest) returns (ListQueuesResponse);
+
+  rpc Publish(PublishRequest) returns (PublishResponse);
+  rpc Subscribe(SubscribeRequest) returns (SubscribeResponse);
+  rpc Consume(ConsumeRequest) returns (ConsumeResponse);
+  rpc Ack(AckRequest) returns (AckResponse);
+}
+
+enum DeliveryGuarantee {
+  DELIVERY_GUARANTEE_UNSPECIFIED = 0;
+  AT_MOST_ONCE = 1;
+  AT_LEAST_ONCE = 2;
+}
+
+message CreateTopicRequest {
+  string name = 1;
+  int32 retention_messages = 2;
+}
+
+message CreateTopicResponse {
+  string name = 1;
+  int32 retention_messages = 2;
+}
+
+message CreateQueueRequest {
+  string topic_name = 1;
+  string queue_id = 2;
+}
+
+message CreateQueueResponse {
+  string topic_name = 1;
+  string queue_id = 2;
+}
+
+message ListTopicsRequest {}
+
+message ListTopicsResponse {
+  repeated TopicInfo topics = 1;
+}
+
+message TopicInfo {
+  string name = 1;
+  int32 retention_messages = 2;
+}
+
+message ListQueuesRequest {
+  string topic_name = 1;
+}
+
+message ListQueuesResponse {
+  repeated QueueInfo queues = 1;
+}
+
+message QueueInfo {
+  string topic_name = 1;
+  string queue_id = 2;
+}
+
+message PublishRequest {
+  string topic_name = 1;
+  string queue_id = 2;
+  bytes payload = 3;
+  string key = 4;
+  map<string, string> headers = 5;
+}
+
+message PublishResponse {
+  string message_id = 1;
+  int64 offset = 2;
+}
+
+message SubscribeRequest {
+  string topic_name = 1;
+  string queue_id = 2;
+  string consumer_group = 3;
+  DeliveryGuarantee delivery_guarantee = 4;
+}
+
+message SubscribeResponse {
+  string subscription_id = 1;
+  string topic_name = 2;
+  string queue_id = 3;
+  string consumer_group = 4;
+}
+
+message ConsumeRequest {
+  string subscription_id = 1;
+  int32 max_messages = 2;
+}
+
+message ConsumeResponse {
+  repeated Message messages = 1;
+}
+
+message Message {
+  string id = 1;
+  string topic_name = 2;
+  string queue_id = 3;
+  bytes payload = 4;
+  string key = 5;
+  map<string, string> headers = 6;
+  int64 offset = 7;
+  string delivery_id = 8;
+}
+
+message AckRequest {
+  string subscription_id = 1;
+  string delivery_id = 2;
+}
+
+message AckResponse {}
