@@ -33,4 +33,4 @@ jobs:
           retention-days: 90
         
       - run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-      - run: go build -o parser cmd/main.go
+      - run: go build -o broker cmd/server/main.go
