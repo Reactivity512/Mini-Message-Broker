@@ -44,7 +44,7 @@ func TestPendingDeliveryRepository_Expired(t *testing.T) {
 		Message:    domain.Message{Offset: 1},
 		ExpiresAt:  now.Add(-time.Second),
 		DeliveryID: "del-expired",
-	}); err == nil {
+	}); err != nil {
 		t.Error(err)
 	}
 
@@ -52,7 +52,7 @@ func TestPendingDeliveryRepository_Expired(t *testing.T) {
 		Message:    domain.Message{Offset: 2},
 		ExpiresAt:  now.Add(time.Hour),
 		DeliveryID: "del-future",
-	}); err == nil {
+	}); err != nil {
 		t.Error(err)
 	}
 
