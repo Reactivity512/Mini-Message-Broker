@@ -1,5 +1,10 @@
 # Mini Message Broker
 
+[![CI](https://github.com/Reactivity512/Mini-Message-Broker/actions/workflows/main.yml/badge.svg)](https://github.com/Reactivity512/Mini-Message-Broker/actions/workflows/main.yml)
+[![Coverage Report](https://img.shields.io/badge/Coverage_Report-HTML-blue)](https://github.com/Reactivity512/Mini-Message-Broker/actions/runs/22080554847/artifacts/5532002510)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Reactivity512/Mini-Message-Broker)](https://goreportcard.com/report/github.com/Reactivity512/Mini-Message-Broker)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Упрощённый брокер сообщений в стиле Kafka: топики, очереди, подписки, гарантии доставки **at-most-once** и **at-least-once**. API по gRPC.
 
 ## Запуск
