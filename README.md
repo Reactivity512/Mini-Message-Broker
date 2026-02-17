@@ -42,6 +42,16 @@ task run
 
 После этого команды grpcurl из README будут работать без флага `-proto`.
 
+### Запуск в Docker
+
+```bash
+# Соберите образ:
+docker build -t mini-message-broker:latest .
+
+# Запустите контейнер
+docker run -p 50051:50051 mini-message-broker:latest
+```
+
 ---
 
 ## Как пользоваться брокером
