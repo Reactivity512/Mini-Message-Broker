@@ -1,6 +1,46 @@
 name: CI
 on: [push, pull_request]
 jobs:
+
+  semgrep:
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep (always pass)
+        run: |
+          semgrep ci --config p/security-audit --supply-chain --config .semgrep/my-rules.yaml --sarif --output semgrep.sarif
+          echo "SEMGREP_EXIT=$?" >> $GITHUB_ENV
+        continue-on-error: true
+      - name: Show findings in console
+        run: |
+          echo "=== Semgrep findings ==="
+          jq -r '
+          .runs[0].results[] as $r |
+          .runs[0].tool.driver.rules[] as $rule |
+          select($r.ruleId == $rule.id) |
+          "-----",
+          "Severity: \($rule.defaultConfiguration.level // $r.level)",
+          "Rule: \($r.ruleId)",
+          "Message: \($r.message.text)",
+          "Location: \($r.locations[0].physicalLocation.artifactLocation.uri):\($r.locations[0].physicalLocation.region.startLine)",
+          ""
+          ' semgrep.sarif
+
+      - name: Fail on ERROR severity
+        if: always()
+        run: |
+            if jq -e '
+              .runs[0].results[] as $r |
+              .runs[0].tool.driver.rules[] as $rule |
+              select($r.ruleId == $rule.id and ($rule.defaultConfiguration.level // $r.level) == "error")
+            ' semgrep.sarif > /dev/null; then
+              echo "❌ Обнаружены уязвимости уровня ERROR, пайплайн остановлен."
+              exit 1
+            fi
+            echo "✅ Нет находок уровня ERROR."
+
   test:
     runs-on: ubuntu-latest
     steps:
